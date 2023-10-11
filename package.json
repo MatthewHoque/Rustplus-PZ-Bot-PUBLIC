@@ -1,0 +1,17 @@
+{
+  "name": "RustDiscord",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@liamcottle/rustplus.js": "^2.3.0",
+    "discord.js": "^14.7.1",
+    "fastpriorityqueue": "^0.7.4"
+  }
+}

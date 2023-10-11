@@ -1,0 +1,37 @@
+{
+  "discordPerms": [123123123],
+  "setInfoPerm": [123123123],
+  "getInfoRoles": [],
+  "current": "indexOfServer",
+  "servers": [
+    {
+      "name": "Any Text Here",
+      "ip": "199.231.233.188",
+      "port": "28035",
+      "playerId": "playerID",
+      "playerToken": "playerToken",
+      "mapSize": 4255,
+      "squaresX": 25,
+      "squaresY": 25
+    }
+  ],
+  "currentChannel": {
+    "v": "discordChannelID"
+  },
+  "vendingChannel": {
+    "v": "discordChannelID"
+  },
+  "devices": {},
+  "fcmChannel": {
+    "v": "discordChannelID"
+  },
+  "pulserBank": {},
+  "pulserIdToName": {},
+  "brokenDevices": {},
+  "sequences": {},
+  "SCQBank": {},
+  "camIgnore": {},
+  "destroCheckNameList": {},
+  "destroSenders": {},
+  "destroReceivers": {}
+}

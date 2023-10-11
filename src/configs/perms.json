@@ -1,0 +1,9 @@
+{
+    "stashPerms": [
+        "steamID"
+    ],
+    "discordMap": {
+        "123123123123":"steamID"
+
+    }
+}
