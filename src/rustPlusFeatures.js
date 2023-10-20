@@ -698,7 +698,7 @@ async function gameTime(vp) {
     vp.rustplus.sendTeamMessage(
       `${typeSun}: ${Math.floor(time)}m ${Math.floor(
         (time - Math.floor(time)) * 60
-      )}s. (${JSON.stringify(message.response.time)})`
+      )}s. (${JSON.stringify(helpers.roundNumbers(message.response.time))})`
     );
     console.log(
       helpers.ts(1) +

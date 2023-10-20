@@ -24,6 +24,25 @@ function jsonUpdateSync(fs, fileName, data) {
   );
 }
 
+
+function roundNumbers(obj, visited = new WeakSet()) {
+  if (visited.has(obj) || typeof obj !== 'object' || obj === null) {
+      return obj;
+  }
+  
+  visited.add(obj);
+
+  for (const key in obj) {
+      if (typeof obj[key] === 'number') {
+          obj[key] = Number(obj[key].toPrecision(5));
+      } else if (typeof obj[key] === 'object') {
+          obj[key] = roundNumbers(obj[key], visited);
+      }
+  }
+
+  return obj;
+}
+
 function compareSteamID(id1, id2) {
   return (
     id1.low == id2.low && id1.high == id2.high && id1.unsigned == id2.unsigned
@@ -205,3 +224,4 @@ module.exports.rustCoords = rustCoords;
 module.exports.orderParser = orderParser;
 module.exports.angle = angle;
 module.exports.bearing = bearing;
+module.exports.roundNumbers = roundNumbers;
