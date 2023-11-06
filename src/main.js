@@ -64,7 +64,7 @@ vp.client.on("messageCreate", (message) => {
 
   console.log(message.content)
   if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content == "!register"
   ) {
     vp.registeredChannel.v = message.channelId;
@@ -72,7 +72,7 @@ vp.client.on("messageCreate", (message) => {
     vp.dat.currentChannel = vp.registeredChannel;
     helpers.jsonUpdate(fs, vp.dataName, vp.dat);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content == "!fcmr"
   ) {
     vp.fcmChannel.v = message.channelId;
@@ -80,7 +80,7 @@ vp.client.on("messageCreate", (message) => {
     vp.dat.fcmChannel = vp.fcmChannel;
     helpers.jsonUpdate(fs, vp.dataName, vp.dat);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content == "!fcmstart"
   ) {
     if (!fcm.isStarted) {
@@ -90,7 +90,7 @@ vp.client.on("messageCreate", (message) => {
       message.reply("FCM already started");
     }
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content == "!vending"
   ) {
     vp.vendingChannel.v = message.channelId;
@@ -98,33 +98,33 @@ vp.client.on("messageCreate", (message) => {
     vp.dat.vendingChannel = vp.vendingChannel;
     helpers.jsonUpdate(fs, vp.dataName, vp.dat);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!device ")
   ) {
     rr.regDevice(fcm, vp, message);
   } else if (
     //deviceId deviceID true/false
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!deviceignore")
   ) {
     vp.rpf.ignoreDeviceDiscord(vp, message);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!pulser")
   ) {
     vp.rpf.makePulse(vp, message);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!rename")
   ) {
     fcm.lastPairRename(message);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!ms")
   ) {
     vp.rpf.mapScanSwitch(vp, message);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!server")
   ) {
     const channel = client.channels.cache.get(registeredChannel);
@@ -134,7 +134,7 @@ vp.client.on("messageCreate", (message) => {
       // message.reply(`Now listening for ${args[2]}. Type: ${rustMsg.response.entityInfo.dType}  State: ${rustMsg.swawwresponse.entityInfo.payload.value}`)
     });
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!vi")
   ) {
     var args = message.content.split(" ");
@@ -143,7 +143,7 @@ vp.client.on("messageCreate", (message) => {
       `Vending Interval set to-: \`\`\`${vp.vendingInterval["r"]}\`\`\``
     );
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!i ")
   ) {
     var args = message.content.split(" ");
@@ -159,7 +159,7 @@ vp.client.on("messageCreate", (message) => {
       vp.vendingIgnore
     );
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!cami")
   ) {
     var args = message.content.split(" ");
@@ -171,7 +171,7 @@ vp.client.on("messageCreate", (message) => {
     message.reply(`Will ignore player(s) ${argsString}`);
     helpers.jsonUpdate(fs, vp.dataName, vp.dat);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!buying")
   ) {
     var args = message.content.split(" ");
@@ -185,7 +185,7 @@ vp.client.on("messageCreate", (message) => {
       vp.vendingSearch
     );
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!selling")
   ) {
     var args = message.content.split(" ");
@@ -199,7 +199,7 @@ vp.client.on("messageCreate", (message) => {
       vp.vendingSearch
     );
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!search")
   ) {
     rr.regSearch(vp, message);
@@ -217,13 +217,13 @@ vp.client.on("messageCreate", (message) => {
     };
     rr.regStash(vp, artificalMsg, message);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!vspecial")
   ) {
     //vendingMachine buying/selling item dir AmountOfOrders
     vp.rpf.registerSpecialVending(message, vp.vendingSpecial);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!scq ")
     //simple camera sequence
     //scq seqName
@@ -231,20 +231,20 @@ vp.client.on("messageCreate", (message) => {
     vp.rpf.registerSCQ(vp, message, message.channelId);
     vp.rpf.bankSCQ(vp, message);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!scqstop")
     //scqstop seqName
   ) {
     vp.rpf.stopSCQ(vp, message);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content == "!rraid"
   ) {
     vp.raidChannel.v = message.channelId;
     message.reply("Registered: " + vp.raidChannel.v);
     helpers.jsonUpdate(fs, vp.dataName, vp.dat);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content == "!rgeneral"
   ) {
     vp.generalChannel.v = message.channelId;
@@ -253,7 +253,7 @@ vp.client.on("messageCreate", (message) => {
   } else if (message.content.startsWith("!lead")) {
     rr.promoteLead(vp, message);
   } else if (
-    message.author.id in vp.dat.discordPerms &&
+    vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!destrocheck")
   ) {
     vp.rpf.createDestroCheck(vp, message);
@@ -264,8 +264,8 @@ vp.client.on("messageCreate", (message) => {
   } else if (message.content.startsWith("!selfinfo")) {
     message.reply(JSON.stringify(message));
   } else if (
-    (message.author.id in vp.dat.discordPerms ||
-      message.author.id in vp.dat.setInfoPerm) &&
+    (vp.dat.discordPerms.includes(message.author.id) ||
+      vp.dat.setInfoPerm.includes(message.author.id)) &&
     message.content.startsWith("!setinfo")
   ) {
     var newInfo = { info: message.content.replace("!setinfo", "") };
@@ -280,7 +280,7 @@ vp.client.on("messageCreate", (message) => {
         if (
           discordHelpers.roleOR(
             discordHelpers.getUser(message.author.id, memberList),
-            message.author.id in vp.dat.getInfoRoles
+            vp.dat.getInfoRoles.includes(message.author.id)
           )
         ) {
           message.author.send(require("./configs/userInfo.json").info);
