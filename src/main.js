@@ -12,7 +12,7 @@ var fcm = new fcmHandler(vp);
 // vp.startup();
 
 // DISCORD
-const { Client, IntentsBitField,GatewayIntentBits } = require("discord.js");
+const { Client, IntentsBitField, GatewayIntentBits } = require("discord.js");
 var tokenFile = require("./discordToken.json");
 
 const client = new Client({
@@ -22,7 +22,7 @@ const client = new Client({
     IntentsBitField.Flags.GuildMessages,
     IntentsBitField.Flags.MessageContent,
     IntentsBitField.Flags.DirectMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
   ],
 });
 
@@ -62,7 +62,7 @@ vp.client.on("messageCreate", (message) => {
     return;
   }
 
-  console.log(message.content)
+  console.log(message.content);
   if (
     vp.dat.discordPerms.includes(message.author.id) &&
     message.content == "!register"
@@ -250,27 +250,30 @@ vp.client.on("messageCreate", (message) => {
     vp.generalChannel.v = message.channelId;
     message.reply("Registered: " + vp.generalChannel.v);
     helpers.jsonUpdate(fs, vp.dataName, vp.dat);
-  } else if (message.content.startsWith("!lead")) {
+  } else if (
+    vp.dat.leadPerm.includes(message.author.id) &&
+    message.content.startsWith("!lead")
+  ) {
     rr.promoteLead(vp, message);
   } else if (
     vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!destrocheck")
   ) {
     vp.rpf.createDestroCheck(vp, message);
-  } else if (
-    message.content.startsWith("!dm")
-  ) {
-    message.author.createDM()
+  } else if (message.content.startsWith("!dm")) {
+    message.author.createDM();
   } else if (message.content.startsWith("!selfinfo")) {
     message.reply(JSON.stringify(message));
   } else if (
-    (vp.dat.discordPerms.includes(message.author.id) ||
-      vp.dat.setInfoPerm.includes(message.author.id)) &&
+    vp.dat.setInfoPerm.includes(message.author.id) &&
     message.content.startsWith("!setinfo")
   ) {
     var newInfo = { info: message.content.replace("!setinfo", "") };
     helpers.jsonUpdate(fs, "./src/configs/userInfo.json", newInfo);
-  } else if (message.content.startsWith("!getinfo")|| message.content.startsWith("!info")) {
+  } else if (
+    message.content.startsWith("!getinfo") ||
+    message.content.startsWith("!info")
+  ) {
     const guild = client.guilds.cache.get(message.guildId);
     if (!guild)
       return console.log(`Can't find the guild with ID ${message.guildId}`);
@@ -329,12 +332,11 @@ vp.rustplus.on("connected", async () => {
 vp.rustplus.on("message", (message) => {
   //console.log("message")
   // check if message is an entity changed broadcast
-if(message.broadcast && message.broadcast.entityChanged){
-  console.log("===========================================")
-  console.log(JSON.stringify(message))
-  console.log("===========================================")
-}
-  
+  if (message.broadcast && message.broadcast.entityChanged) {
+    console.log("===========================================");
+    console.log(JSON.stringify(message));
+    console.log("===========================================");
+  }
 
   if (message.broadcast && message.broadcast.teamMessage) {
     console.log("------start------");

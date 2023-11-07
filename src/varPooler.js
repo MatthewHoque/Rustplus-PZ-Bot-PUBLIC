@@ -18,8 +18,10 @@ class varPooler {
   startup() {
     // console.log("VARPOOLER STARTUP");
     this.fs = require("fs");
-    this.dataName = "./src/configs/data.json";
-    this.dat = require("./configs/data.json");
+    this.dataFileName = require("./configs/datafilename.json");
+    console.log(this.dataFileName)
+    this.dataName = "./src/configs/"+this.dataFileName.dataFileName+".json";
+    this.dat = require("./configs/"+this.dataFileName.dataFileName+".json");
     this.perms = require("./configs/perms.json");
     this.itemDB = require("./configs/itemDB.json");
     this.vendingIgnore = require("./configs/vendingIgnore.json");

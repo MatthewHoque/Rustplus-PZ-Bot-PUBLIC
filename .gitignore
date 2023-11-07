@@ -13,6 +13,7 @@ lerna-debug.log*
 src/tests/*
 discordToken.json
 rustplus.config.json
+src/configs/hiddenDataFile.json
 
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
