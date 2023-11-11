@@ -1,7 +1,7 @@
 {
   "discordPerms": ["123123123"],
   "leadPerm": ["123123123"],
-  "setInfoPerm": ["123123123"],
+  "setInfoRoles": ["123123123"],
   "getInfoRoles": ["123123123"],
   "current": "indexOfServer",
   "servers": [

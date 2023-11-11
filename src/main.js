@@ -12,8 +12,39 @@ var fcm = new fcmHandler(vp);
 // vp.startup();
 
 // DISCORD
+const { REST, Routes } = require("discord.js");
 const { Client, IntentsBitField, GatewayIntentBits } = require("discord.js");
 var tokenFile = require("./discordToken.json");
+
+const commands = [
+  {
+    name: "ping",
+    description: "Replies with Pong!",
+  },
+  {
+    name: "code",
+    description: "For guest code",
+  },
+];
+const rest = new REST({ version: "10" }).setToken(tokenFile.token);
+
+async function regDiscordCmds(CLIENT_ID, GUILD_ID, commands) {
+  try {
+    console.log("Started refreshing application (/) commands.");
+
+    await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), {
+      body: commands,
+    });
+
+    console.log("Successfully reloaded application (/) commands.");
+  } catch (error) {
+    console.error(error);
+  }
+}
+tokenFile.devGuildId.forEach((guildId)=>{
+  regDiscordCmds(tokenFile.clientId, guildId, commands); // Call the async function to execute the code
+})
+
 
 const client = new Client({
   intents: [
@@ -57,6 +88,64 @@ vp.client.on("ready", () => {
     }
   }
 });
+
+client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === "ping") {
+    await interaction.reply({
+      embeds: [
+        {
+          title: `Hello`,
+          description: ``,
+        },
+      ],
+      //this is the important part
+      ephemeral: true,
+    });
+  } else if (interaction.commandName === "code") {
+    const guild = client.guilds.cache.get(interaction.guildId);
+    if (!guild)
+      return console.log(`Can't find the guild with ID ${interaction.guildId}`);
+    guild.members
+      .fetch() //this gives a whole list if user id not found, using incorrectly initially
+      .then(async (memberList) => {
+        // console.log(memberList);
+        // console.log(interaction.member.user.id);
+        if (
+          discordHelpers.roleOR(
+            discordHelpers.getUser(interaction.member.user.id, memberList),
+            vp.dat.getInfoRoles
+          )
+        ) {
+          await interaction.reply({
+            embeds: [
+              {
+                title: `Do not share, if asked, refer to this command`,
+                description: require("./configs/userInfo.json").info,
+              },
+            ],
+            //this is the important part
+            ephemeral: true,
+          });
+          delete require.cache[require.resolve("./configs/userInfo.json")];
+        } else {
+          await interaction.reply({
+            embeds: [
+              {
+                title: `You do not have permissions for this`,
+                description: "Contact Rustalz admin",
+              },
+            ],
+            //this is the important part
+            ephemeral: true,
+          });
+        }
+      })
+      .catch(console.error);
+  }
+});
+
 vp.client.on("messageCreate", (message) => {
   if (!message.content.startsWith("!")) {
     return;
@@ -264,12 +353,25 @@ vp.client.on("messageCreate", (message) => {
     message.author.createDM();
   } else if (message.content.startsWith("!selfinfo")) {
     message.reply(JSON.stringify(message));
-  } else if (
-    vp.dat.setInfoPerm.includes(message.author.id) &&
-    message.content.startsWith("!setinfo")
-  ) {
-    var newInfo = { info: message.content.replace("!setinfo", "") };
-    helpers.jsonUpdate(fs, "./src/configs/userInfo.json", newInfo);
+  } else if (message.content.startsWith("!setinfo")) {
+    const guild = client.guilds.cache.get(message.guildId);
+    if (!guild)
+      return console.log(`Can't find the guild with ID ${message.guildId}`);
+    guild.members
+      .fetch(message.authorId)
+      .then((memberList) => {
+        // console.log(memberList)
+        if (
+          discordHelpers.roleOR(
+            discordHelpers.getUser(message.author.id, memberList),
+            vp.dat.setInfoRoles
+          )
+        ) {
+          var newInfo = { info: message.content.replace("!setinfo", "") };
+          helpers.jsonUpdate(fs, "./src/configs/userInfo.json", newInfo);
+        }
+      })
+      .catch(console.error);
   } else if (
     message.content.startsWith("!getinfo") ||
     message.content.startsWith("!info")
@@ -280,13 +382,22 @@ vp.client.on("messageCreate", (message) => {
     guild.members
       .fetch(message.authorId)
       .then((memberList) => {
+        // console.log(memberList);
         if (
           discordHelpers.roleOR(
             discordHelpers.getUser(message.author.id, memberList),
-            vp.dat.getInfoRoles.includes(message.author.id)
+            vp.dat.getInfoRoles
           )
         ) {
-          message.author.send(require("./configs/userInfo.json").info);
+          // try{
+          message.author
+            .send(require("./configs/userInfo.json").info)
+            .catch(
+              message.reply("Messaged unless DMs are off").catch(console.error)
+            );
+          // }catch(error){
+          //   console.log()
+          // }
           delete require.cache[require.resolve("./configs/userInfo.json")];
         }
       })
