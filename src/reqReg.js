@@ -19,6 +19,13 @@ class reqReg {
     vp.throt.processQueueLoop();
   }
 
+  static regSetDevice(vp, deviceId,onOff) {
+    var curryCall = new curryPot(vp.rpf.wrapToggleDevice,null,vp,deviceId,onOff);
+    curryCall.setVars(1, 1, 0);
+    vp.throt.queueReq(curryCall);
+    vp.throt.processQueueLoop();
+  }
+
   //will be unused
   static regAutoDeviceRegister(vp, deviceId) {
     var curryCall = new curryPot(vp.rpf.autoDeviceRegister, null, vp, deviceId);

@@ -1,0 +1,65 @@
+{
+    "networks": {
+        "network1": {
+            "cycleDelay": 2000,
+            "order": [
+                {
+                    "glist": [
+                        "compound"
+                    ],
+                    "time": 10000,
+                    "hasTargetTime": 2000
+                },
+                {
+                    "glist": [
+                        "roof"
+                    ],
+                    "time": 6000,
+                    "hasTargetTime": 2000
+                },
+                {
+                    "glist": [
+                        "shell"
+                    ],
+                    "time": 6000,
+                    "hasTargetTime": 2000
+                }
+            ],
+            "groups": {
+                "shell": {
+                    "priority": 1000,
+                    "size": 6,
+                    "switch": 136796,
+                    "hasTarget": [
+                        40727
+                    ],
+                    "hbfList": [
+                        43621
+                    ]
+                },
+                "roof": {
+                    "priority": 100,
+                    "size": 5,
+                    "switch": 40735,
+                    "hasTarget": [
+                        40722
+                    ],
+                    "hbfList": [
+                        43626
+                    ]
+                },
+                "compound": {
+                    "priority": 10,
+                    "size": 11,
+                    "switch": 40738,
+                    "hasTarget": [
+                        40719
+                    ],
+                    "hbfList": [
+                        43627
+                    ]
+                }
+            }
+        }
+    }
+}

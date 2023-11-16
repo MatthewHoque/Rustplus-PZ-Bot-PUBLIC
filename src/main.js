@@ -41,10 +41,9 @@ async function regDiscordCmds(CLIENT_ID, GUILD_ID, commands) {
     console.error(error);
   }
 }
-tokenFile.devGuildId.forEach((guildId)=>{
+tokenFile.devGuildId.forEach((guildId) => {
   regDiscordCmds(tokenFile.clientId, guildId, commands); // Call the async function to execute the code
-})
-
+});
 
 const client = new Client({
   intents: [
@@ -402,6 +401,18 @@ vp.client.on("messageCreate", (message) => {
         }
       })
       .catch(console.error);
+  } else if (
+    vp.dat.discordPerms.includes(message.author.id) &&
+    message.content.startsWith("!test ")
+  ) {
+    var args = message.content.split(" ");
+    // vp.rustplus.turnSmartSwitchOn(args[1],()=>{console.log("TEST")})
+    rr.regSetDevice(vp, args[1], args[2]);
+  } else if (
+    vp.dat.discordPerms.includes(message.author.id) &&
+    message.content.startsWith("!networks")
+  ) {
+    vp.turretNetworks = vp.rpf.iniAllTurretNetworks(vp,"./configs/turretGroups.json");
   }
 });
 
@@ -443,11 +454,11 @@ vp.rustplus.on("connected", async () => {
 vp.rustplus.on("message", (message) => {
   //console.log("message")
   // check if message is an entity changed broadcast
-  if (message.broadcast && message.broadcast.entityChanged) {
-    console.log("===========================================");
-    console.log(JSON.stringify(message));
-    console.log("===========================================");
-  }
+  // if (message.broadcast && message.broadcast.entityChanged) {
+  //   console.log("===========================================");
+  //   console.log(JSON.stringify(message));
+  //   console.log("===========================================");
+  // }
 
   if (message.broadcast && message.broadcast.teamMessage) {
     console.log("------start------");
@@ -523,6 +534,7 @@ vp.rustplus.on("message", (message) => {
     var value = entityChanged.payload.value;
 
     vp.rpf.onDeviceDestroCheck(vp, message, entityId, value);
+    vp.rpf.distributeTurretDeviceChange(vp,message)
     // log the entity status
 
     var serverDevices =

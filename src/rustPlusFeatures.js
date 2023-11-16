@@ -3,6 +3,7 @@ var fs = require("fs");
 const rr = require("./reqReg.js");
 const Pulser = require("./Pulser.js");
 const Sequencer = require("./MySequencer.js");
+const turretNetwork = require("./turretSystem/turretNetwork.js");
 
 function checkSpecialVending(
   data,
@@ -263,7 +264,11 @@ async function mapMarkerScan(
               JSON.stringify(vendingDB[marker.id].sellOrders) &&
             !vendingIgnore.hasOwnProperty(marker.id)
           ) {
-            if (vendingChannel.v != null && !mapFirst.val && marker.name!="Boat Vendor") {
+            if (
+              vendingChannel.v != null &&
+              !mapFirst.val &&
+              marker.name != "Boat Vendor"
+            ) {
               const channel = client.channels.cache.get(vendingChannel.v);
               channel.send(
                 `:gear: VM Order Change ** ${
@@ -434,7 +439,7 @@ async function loadDevices(
   for (const [key, value] of Object.entries(serverDevices)) {
     rr.regLoadDeviceSingle(vp, key);
     // loadDeviceSingle(rustplus,key,data,dataName)
-    await helpers.delay(1000);
+    await helpers.delay(300);
   }
   if (registeredChannel.v != null) {
     var channel = client.channels.cache.get(registeredChannel.v);
@@ -752,6 +757,9 @@ async function handleBrokenPulser(vp, deviceId, message) {
     message.response.error != undefined &&
     message.response.error.error == "not_found"
   ) {
+    if(vp.dat.pulserIdToName[deviceId]==null){
+      return
+    }
     vp.dat.brokenDevices[deviceId] = true;
     for (const [key, value] of Object.entries(
       vp.dat.pulserIdToName[deviceId]
@@ -842,11 +850,11 @@ async function registerSCQ(vp, message, channelId) {
 module.exports.registerSCQ = registerSCQ;
 
 async function onDeviceDestroCheck(vp, message, entityId, value) {
-  console.log(
-    `${helpers.ts(3)} ${helpers.ts(
-      2
-    )} ${entityId} ${value} onDeviceDestroCheck `
-  );
+  // console.log(
+  //   `${helpers.ts(3)} ${helpers.ts(
+  //     2
+  //   )} ${entityId} ${value} onDeviceDestroCheck `
+  // );
   if (value == 1) {
     if (vp.dat.destroSenders.hasOwnProperty(entityId)) {
       vp.dcheckValList[vp.dat.destroSenders[entityId]]++;
@@ -1001,5 +1009,38 @@ async function promoteToLeader(vp, message) {
   // seqName cameraId falseLoopDelay priority
 }
 module.exports.promoteToLeader = promoteToLeader;
+
+function iniAllTurretNetworks(vp, turretConfig) {
+  
+  
+  if(vp==undefined){
+    console.log("VP IS UNDEFINED IN iniAllTurretNetworks")
+  }else{
+    console.log("VP IS DEFINITELY DEFINED ++++ IN iniAllTurretNetworks")
+  }
+
+  let configFile = require(turretConfig);
+
+  let turretNetworks = {};
+  for (let network in configFile["networks"]) {
+    console.log(`INITURRETS INDIVIDUAL NETWORK: ${network}`)
+    turretNetworks[network+""] = new turretNetwork(vp, configFile, network);
+  }
+
+  return turretNetworks;
+}
+module.exports.iniAllTurretNetworks = iniAllTurretNetworks;
+
+function distributeTurretDeviceChange(vp, deviceInfo) {
+  // console.log(vp.turretNetworks)
+  // if (vp.turretNetworks.length>0) {
+    for(let network in vp.turretNetworks){
+      // console.log(`distributeTUrretDeviceCHange INDIVIDUAL NETWORK: ${network}`)
+      let cNetwork=vp.turretNetworks[network]
+      cNetwork.deviceTriggerResponse(deviceInfo)
+    }
+  // }
+}
+module.exports.distributeTurretDeviceChange = distributeTurretDeviceChange;
 // }
 // module.exports.fcmRegisterDevice = fcmRegisterDevice;

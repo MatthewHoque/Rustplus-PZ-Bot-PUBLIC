@@ -30,6 +30,9 @@ class varPooler {
     this.vendingSpecial = require("./configs/vendingSpecial.json");
     this.helpers = require("./helpers.js");
     this.rpf = require("./rustPlusFeatures.js");
+    this.turretNetworks={}
+   
+   
 
 
     this.throt = new throttler(this);
