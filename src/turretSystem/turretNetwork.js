@@ -16,6 +16,9 @@ class turretNetwork extends EventEmitter {
     this.emergencyQueue = new MaxPriorityQueue();
     this.hbfHash = {};
     this.hasTargetHash = {};
+    this.switchHash = {};
+
+    // this.delayedGroupShutoffs = [];
 
     // this.sumOfTurrets= 0
     this.currentTimers = [];
@@ -23,8 +26,8 @@ class turretNetwork extends EventEmitter {
     this.nextGroups = {};
     this.currentCycleExtendTimer = 0;
 
-    this.currentGroupsSNAP = {};
-    this.nextGroupsSNAP = {};
+    // this.currentGroupsSNAP = {};
+    // this.nextGroupsSNAP = {};
 
     this.tData = turretDataFile;
     if (!this.tData["networks"]) {
@@ -48,10 +51,6 @@ class turretNetwork extends EventEmitter {
       this.cycle();
     });
 
-    // this.on("HBF-Sense", () => {
-    //   this.stopCurrentCycle();
-    // });
-
     this.cycle();
   }
 
@@ -65,6 +64,8 @@ class turretNetwork extends EventEmitter {
       groups[group]["hasTarget"].forEach((id) => {
         this.hasTargetHash[id] = group;
       });
+
+      this.switchHash[groups[group]["switch"]] = group;
     }
 
     console.log(this.hbfHash);
@@ -97,12 +98,13 @@ class turretNetwork extends EventEmitter {
 
   cycle(snap) {
     console.log("========= Cycling =======");
+    this.cycleEnable=true
     // if (snap) {
-      // this.currentGroups = JSON.parse(JSON.stringify(this.currentGroupsSNAP));
-      // this.nextGroups = JSON.parse(JSON.stringify(this.nextGroupsSNAP));
-      // console.log(this.currentGroupsSNAP, this.nextGroupsSNAP);
-      // console.log(this.currentGroups, this.nextGroups);
-      // console.log("====SPECIAL=====")
+    // this.currentGroups = JSON.parse(JSON.stringify(this.currentGroupsSNAP));
+    // this.nextGroups = JSON.parse(JSON.stringify(this.nextGroupsSNAP));
+    // console.log(this.currentGroupsSNAP, this.nextGroupsSNAP);
+    // console.log(this.currentGroups, this.nextGroups);
+    // console.log("====SPECIAL=====")
     // }
 
     if (this.pausedOnTarget) {
@@ -111,17 +113,20 @@ class turretNetwork extends EventEmitter {
     }
 
     const time = this.nData["order"][this.cycleIndex]["time"];
+
     const hasTargetTime = this.nData["order"][this.cycleIndex]["hasTargetTime"];
     this.currentCycleExtendTimer = hasTargetTime;
 
-    // for (let group in this.currentGroups) {
-    //   if (this.currentGroups.hasOwnProperty(group)) {
-    //     if (!this.nData["order"][this.cycleIndex]["glist"].includes(group)) {
-    //       this.currentGroups[group] = false;
-    //       console.log(`removing ${group} from currentGroups`);
-    //     }
-    //   }
-    // }
+    this.nextWarmupTime =
+      this.nData["order"][this.getCycleIndex(1)]["warmupTime"];
+    this.nextWarmupTimeAdjust = time - this.nextWarmupTime;
+    console.log(`Next warmup time: ${this.nextWarmupTime}`);
+    console.log(`nextWarmupTimeAdjust: ${this.nextWarmupTimeAdjust}`);
+
+    //hard coded enforcement of warmup time not reducing turret cycle before they even warm up the prior cycle
+    if (this.nextWarmupTimeAdjust < 3000) {
+      this.nextWarmupTimeAdjust = 3000;
+    }
 
     this.nData["order"][this.cycleIndex]["glist"].forEach((turrGroup) => {
       this.nextGroups[turrGroup] = this.nData["groups"][turrGroup]["size"];
@@ -141,32 +146,41 @@ class turretNetwork extends EventEmitter {
 
     this.stageTransition();
 
-    const tempPromise = this.runAfterDelay(time);
+    const tempPromise = this.runAfterDelay(this.nextWarmupTimeAdjust);
     this.processes["currentCycleProcess"] = tempPromise;
-    // console.log(this.processes["currentCycleProcess"]);
     this.processes["currentCycleProcess"]
       .then((result) => {
-        // console.log(result);
         this.emit("cycle");
       })
       .catch((error) => {
         console.error(error.message); // Output: Promise canceled
       });
 
-    if (
-      this.cycleIndex ==
-      this.tData["networks"][this.networkName]["order"].length - 1
-    ) {
-      this.cycleIndex = 0;
-      //   console.log("RESET " + this.cycleIndex);
-    } else {
-      this.cycleIndex += 1;
-      //   console.log("Increment " + this.cycleIndex);
-    }
+    this.cycleIndex = this.getCycleIndex(1);
+    // if (
+    //   this.cycleIndex ==
+    //   this.tData["networks"][this.networkName]["order"].length - 1
+    // ) {
+    //   this.cycleIndex = 0;
+    //   //   console.log("RESET " + this.cycleIndex);
+    // } else {
+    //   this.cycleIndex += 1;
+    //   //   console.log("Increment " + this.cycleIndex);
+    // }
   }
 
   stopCurrentCycle() {
     this.processes["currentCycleProcess"].cancel();
+    if(this.processes.hasOwnProperty("shutDownDelay")){
+      this.processes["shutDownDelay"].cancel();
+    }
+
+    // for (let grp in this.delayedGroupShutoffs) {
+    //   if (this.delayedGroupShutoffs.hasOwnProperty(key)) {
+    //     this.currentGroups.push()
+    //   }
+    // }
+
     this.cycleEnable = false;
     // console.log(this.processes["currentCycleProcess"])
 
@@ -229,19 +243,31 @@ class turretNetwork extends EventEmitter {
 
   hasTargetOnResponse(scope, value, entityId) {
     console.log("DEVICE TRIGGER - TARGET ON");
-    if (!this.pausedOnTarget && this.emergencyQueue.pq.length == 0) {
-      var groupRef = this.hasTargetHash[entityId];
-      this.pausedOnTarget = true;
-      this.stopCurrentCycle();
-    }
+    // if (!this.pausedOnTarget && this.emergencyQueue.pq.length == 0) {
+    //   var groupRef = this.hasTargetHash[entityId];
+    //   this.pausedOnTarget = true;
+    //   this.stopCurrentCycle();
+    // }
+    console.log(entityId);
+    console.log(this.hasTargetHash);
+    var groupRef = this.hasTargetHash[entityId];
+    console.log(groupRef);
+    var priority = this.nData["groups"][groupRef]["priority"];
+    // var switchId= this.nData['groups'][groupRef]['switch']
+
+    this.emergencyQueue.addElement(entityId, priority);
+    this.evalStage();
   }
 
   hasTargetOffResponse(scope, value, entityId) {
     console.log("DEVICE TRIGGER - TARGET OFF");
-    if (this.pausedOnTarget) {
-      this.pausedOnTarget = false;
-      this.evalStage();
-    }
+    // if (this.pausedOnTarget) {
+    //   this.pausedOnTarget = false;
+    //   this.evalStage();
+    // }
+    this.emergencyQueue.removeElement(entityId);
+    console.log(this.emergencyQueue.pq);
+    this.evalStage();
   }
 
   evalStage() {
@@ -255,9 +281,9 @@ class turretNetwork extends EventEmitter {
       var alarmId = this.emergencyQueue.peek()[0];
       var prioGroup = this.alarmToGroup(alarmId);
       this.nextGroups[prioGroup] = this.nData["groups"][prioGroup]["size"];
+      console.log(`Nextgroups ${this.nextGroups}`);
       this.stageTransition();
     }
-    
   }
 
   alarmToGroup(alarmId) {
@@ -311,8 +337,20 @@ class turretNetwork extends EventEmitter {
         // console.log(group,transitionTally[group])
         //the if here: not needed now but small addition for potential future proofing
         if (transitionTally[group] < 0) {
-          console.log(`TURNING OFF ${group}`);
-          rr.regSetDevice(this.vp, this.nData["groups"][group]["switch"], 0);
+          var nextWarmupTimeCalcd=0
+          if(this.cycleEnable){
+            nextWarmupTimeCalcd=this.nextWarmupTime
+          }
+          
+          console.log(
+            `Scheduled to turn off: ${group} ${this.nData["groups"][group]["switch"]} in ${this.nextWarmupTime}`
+          );
+          this.threadedRegSetDevice(
+            this.vp,
+            this.nData["groups"][group]["switch"],
+            0,
+            nextWarmupTimeCalcd
+          );
         } else if (transitionTally[group] > 0) {
           console.log(`TURNING ON ${group}`);
           rr.regSetDevice(this.vp, this.nData["groups"][group]["switch"], 1);
@@ -323,6 +361,45 @@ class turretNetwork extends EventEmitter {
         }
       }
     }
+  }
+
+  threadedRegSetDevice(vp, deviceId, onOff, delay) {
+    var group = this.switchHash[deviceId];
+    console.log(`turning off ${deviceId} in ${delay} - delay`);
+    if (delay == 0) {
+      rr.regSetDevice(vp, deviceId, onOff);
+    } else {
+      // this.delayedGroupShutoffs[group] = true;
+      const tempPromise = this.runAfterDelay(delay);
+      tempPromise
+        .then((result) => {
+          rr.regSetDevice(vp, deviceId, onOff);
+          // if (this.delayedGroupShutoffs.hasOwnProperty(group)) {
+          //   delete this.delayedGroupShutoffs.group;
+          // }
+          console.log(`TURNING OFF DELAYED ${deviceId}`);
+        })
+        .catch((error) => {
+          console.log(`Delayed shutoff canceled on ${group}`);
+          // console.error(`Delay canceled, old currentGroups ${JSON.stringify(this.currentGroups)}`);
+          this.currentGroups[group] = this.nData["groups"][group]["size"];
+          // console.error(`Delay canceled, new currentGroups ${JSON.stringify(this.currentGroups)}`);
+          this.evalStage()
+        });
+      this.processes["shutDownDelay"] = tempPromise;
+    }
+  }
+
+  getCycleIndex(shift) {
+    var currentIndex = this.cycleIndex;
+    var shifted = currentIndex + shift;
+    var cycleSize = this.tData["networks"][this.networkName]["order"].length;
+    var modded = shifted % cycleSize;
+
+    if (modded < 0) {
+      return cycleSize + modded;
+    }
+    return modded;
   }
 }
 

@@ -7,22 +7,25 @@
                     "glist": [
                         "compound"
                     ],
-                    "time": 10000,
-                    "hasTargetTime": 2000
+                    "time": 15000,
+                    "hasTargetTime": 2000,
+                    "warmupTime":3500
                 },
                 {
                     "glist": [
                         "roof"
                     ],
-                    "time": 6000,
-                    "hasTargetTime": 2000
+                    "time": 10000,
+                    "hasTargetTime": 2000,
+                    "warmupTime":7000
                 },
                 {
                     "glist": [
                         "shell"
                     ],
-                    "time": 6000,
-                    "hasTargetTime": 2000
+                    "time": 10000,
+                    "hasTargetTime": 2000,
+                    "warmupTime":3500
                 }
             ],
             "groups": {
@@ -57,6 +60,82 @@
                     ],
                     "hbfList": [
                         43627
+                    ]
+                }
+            }
+        },
+        "network2": {
+            "cycleDelay": 2000,
+            "order": [
+                {
+                    "glist": [
+                        "g1"
+                    ],
+                    "time": 15000,
+                    "hasTargetTime": 2000,
+                    "warmupTime":3500
+                },
+                {
+                    "glist": [
+                        "g2"
+                    ],
+                    "time": 10000,
+                    "hasTargetTime": 2000,
+                    "warmupTime":7000
+                },
+                {
+                    "glist": [
+                        "g3",
+                        "g4"
+                    ],
+                    "time": 10000,
+                    "hasTargetTime": 2000,
+                    "warmupTime":3500
+                }
+            ],
+            "groups": {
+                "g1": {
+                    "priority": 1000,
+                    "size": 12,
+                    "switch": 2441662,
+                    "hasTarget": [
+                        2443238
+                    ],
+                    "hbfList": [
+                        2470100
+                    ]
+                },
+                "g2": {
+                    "priority": 100,
+                    "size": 11,
+                    "switch": 2451071,
+                    "hasTarget": [
+                        2452740
+                    ],
+                    "hbfList": [
+                        2471132
+                    ]
+                },
+                "g3": {
+                    "priority": 6,
+                    "size": 11,
+                    "switch": 2456940,
+                    "hasTarget": [
+                        2457504
+                    ],
+                    "hbfList": [
+                        2471123
+                    ]
+                },
+                "g4": {
+                    "priority": 1,
+                    "size": 2,
+                    "switch": 2458734,
+                    "hasTarget": [
+                        2462871
+                    ],
+                    "hbfList": [
+                        2471155
                     ]
                 }
             }
