@@ -1,8 +1,16 @@
 {
-  "discordPerms": ["123123123"],
-  "setLeadRoles": ["123123123"],
-  "setInfoRoles": ["123123123"],
-  "getInfoRoles": ["123123123"],
+  "discordPerms": [
+    "123123123"
+  ],
+  "setLeadRoles": [
+    "123123123"
+  ],
+  "setInfoRoles": [
+    "123123123"
+  ],
+  "getInfoRoles": [
+    "123123123"
+  ],
   "current": "indexOfServer",
   "servers": [
     {
@@ -24,6 +32,9 @@
   },
   "devices": {},
   "fcmChannel": {
+    "v": "discordChannelID"
+  },
+  "teamChatChannel": {
     "v": "discordChannelID"
   },
   "pulserBank": {},

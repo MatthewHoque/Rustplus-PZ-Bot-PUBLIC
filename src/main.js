@@ -146,7 +146,7 @@ client.on("interactionCreate", async (interaction) => {
         }
       })
       .catch(console.error);
-  } 
+  }
   // else if (interaction.commandName === "lead") {
   //   const guild = client.guilds.cache.get(interaction.guildId);
   //   if (!guild)
@@ -523,6 +523,23 @@ vp.rustplus.on("message", (message) => {
 
   if (message.broadcast && message.broadcast.teamMessage) {
     console.log("------start------");
+    if (
+      vp.dat.teamChatChannel != undefined &&
+      vp.dat.teamChatChannel.v != undefined &&
+      vp.dat.teamChatChannel.v != "noteamchat"
+    ) {
+      const channel = vp.client.channels.cache.get(vp.dat.teamChatChannel.v);
+      if (
+        message != undefined &&
+        message.broadcast != undefined &&
+        message.broadcast.teamMessage != undefined &&
+        message.broadcast.teamMessage.message != undefined &&
+        message.broadcast.teamMessage.message.name != undefined &&
+        message.broadcast.teamMessage.message.message != undefined &&
+        message.broadcast.teamMessage.message.time != undefined
+      )
+        channel.send(`${helpers.ts(2)} (${message.broadcast.teamMessage.message.time}) **${message.broadcast.teamMessage.message.name}**:${message.broadcast.teamMessage.message.message}`);
+    }
     console.log(JSON.stringify(message));
     console.log("------end------");
     sidto = message.broadcast.teamMessage.message.steamId;
