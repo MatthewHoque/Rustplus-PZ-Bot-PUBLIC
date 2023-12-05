@@ -25,6 +25,10 @@ const commands = [
     name: "code",
     description: "For guest code",
   },
+  // {
+  //   name: "lead",
+  //   description: "/lead <steamId>",
+  // },
 ];
 const rest = new REST({ version: "10" }).setToken(tokenFile.token);
 
@@ -142,7 +146,48 @@ client.on("interactionCreate", async (interaction) => {
         }
       })
       .catch(console.error);
-  }
+  } 
+  // else if (interaction.commandName === "lead") {
+  //   const guild = client.guilds.cache.get(interaction.guildId);
+  //   if (!guild)
+  //     return console.log(`Can't find the guild with ID ${interaction.guildId}`);
+  //   guild.members
+  //     .fetch() //this gives a whole list if user id not found, using incorrectly initially
+  //     .then(async (memberList) => {
+  //       // console.log(memberList);
+  //       // console.log(interaction.member.user.id);
+  //       if (
+  //         discordHelpers.roleOR(
+  //           discordHelpers.getUser(interaction.member.user.id, memberList),
+  //           vp.dat.setLeadRoles
+  //         )
+  //       ) {
+  //         await interaction.reply({
+  //           embeds: [
+  //             {
+  //               title: `Sent lead change request`,
+  //               description: `${interaction.}`,
+  //             },
+  //           ],
+  //           //this is the important part
+  //           ephemeral: true,
+  //         });
+  //         // rr.promoteLead(vp, message);
+  //       } else {
+  //         await interaction.reply({
+  //           embeds: [
+  //             {
+  //               title: `You do not have permissions for this`,
+  //               description: "Contact Rustalz admin",
+  //             },
+  //           ],
+  //           //this is the important part
+  //           ephemeral: true,
+  //         });
+  //       }
+  //     })
+  //     .catch(console.error);
+  // }
 });
 
 vp.client.on("messageCreate", (message) => {
@@ -338,11 +383,24 @@ vp.client.on("messageCreate", (message) => {
     vp.generalChannel.v = message.channelId;
     message.reply("Registered: " + vp.generalChannel.v);
     helpers.jsonUpdate(fs, vp.dataName, vp.dat);
-  } else if (
-    vp.dat.leadPerm.includes(message.author.id) &&
-    message.content.startsWith("!lead")
-  ) {
-    rr.promoteLead(vp, message);
+  } else if (message.content.startsWith("!lead")) {
+    const guild = client.guilds.cache.get(message.guildId);
+    if (!guild)
+      return console.log(`Can't find the guild with ID ${message.guildId}`);
+    guild.members
+      .fetch(message.authorId)
+      .then((memberList) => {
+        // console.log(memberList)
+        if (
+          discordHelpers.roleOR(
+            discordHelpers.getUser(message.author.id, memberList),
+            vp.dat.setLeadRoles
+          )
+        ) {
+          rr.promoteLead(vp, message);
+        }
+      })
+      .catch(console.error);
   } else if (
     vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!destrocheck")
@@ -412,7 +470,10 @@ vp.client.on("messageCreate", (message) => {
     vp.dat.discordPerms.includes(message.author.id) &&
     message.content.startsWith("!networks")
   ) {
-    vp.turretNetworks = vp.rpf.iniAllTurretNetworks(vp,"./configs/turretGroups.json");
+    vp.turretNetworks = vp.rpf.iniAllTurretNetworks(
+      vp,
+      "./configs/turretGroups.json"
+    );
   }
 });
 
@@ -534,7 +595,7 @@ vp.rustplus.on("message", (message) => {
     var value = entityChanged.payload.value;
 
     vp.rpf.onDeviceDestroCheck(vp, message, entityId, value);
-    vp.rpf.distributeTurretDeviceChange(vp,message)
+    vp.rpf.distributeTurretDeviceChange(vp, message);
     // log the entity status
 
     var serverDevices =
