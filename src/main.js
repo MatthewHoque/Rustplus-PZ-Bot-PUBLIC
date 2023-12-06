@@ -4,7 +4,7 @@ const helpers = require("./helpers.js");
 const fs = require("fs");
 const rr = require("./reqReg.js");
 const fcmHandler = require("./fcmHandler.js");
-
+const DiscordCommandTool = require("./DiscordCommandTool.js");
 var vp = new varPooler();
 var fcm = new fcmHandler(vp);
 // fcm.startup();
@@ -12,42 +12,48 @@ var fcm = new fcmHandler(vp);
 // vp.startup();
 
 // DISCORD
-const { REST, Routes } = require("discord.js");
+
+// const { REST, Routes } = require("discord.js");
 const { Client, IntentsBitField, GatewayIntentBits } = require("discord.js");
 var tokenFile = require("./discordToken.json");
 
-const commands = [
-  {
-    name: "ping",
-    description: "Replies with Pong!",
-  },
-  {
-    name: "code",
-    description: "For guest code",
-  },
+
+
+// const commands = [
+//   {
+//     name: "ping",
+//     description: "Replies with Pong!",
+//   },
+//   {
+//     name: "code",
+//     description: "For guest code",
+//   },
   // {
   //   name: "lead",
   //   description: "/lead <steamId>",
   // },
-];
-const rest = new REST({ version: "10" }).setToken(tokenFile.token);
+// ];
 
-async function regDiscordCmds(CLIENT_ID, GUILD_ID, commands) {
-  try {
-    console.log("Started refreshing application (/) commands.");
+var regDisc=new DiscordCommandTool(tokenFile)
 
-    await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), {
-      body: commands,
-    });
+// const rest = new REST({ version: "10" }).setToken(tokenFile.token);
 
-    console.log("Successfully reloaded application (/) commands.");
-  } catch (error) {
-    console.error(error);
-  }
-}
-tokenFile.devGuildId.forEach((guildId) => {
-  regDiscordCmds(tokenFile.clientId, guildId, commands); // Call the async function to execute the code
-});
+// async function regDiscordCmds(CLIENT_ID, GUILD_ID, commands) {
+//   try {
+//     console.log("Started refreshing application (/) commands.");
+
+//     await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), {
+//       body: commands,
+//     });
+
+//     console.log("Successfully reloaded application (/) commands.");
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
+// tokenFile.devGuildId.forEach((guildId) => {
+//   regDiscordCmds(tokenFile.clientId, guildId, commands); // Call the async function to execute the code
+// });
 
 const client = new Client({
   intents: [
@@ -538,7 +544,11 @@ vp.rustplus.on("message", (message) => {
         message.broadcast.teamMessage.message.message != undefined &&
         message.broadcast.teamMessage.message.time != undefined
       )
-        channel.send(`${helpers.ts(2)} (${message.broadcast.teamMessage.message.time}) **${message.broadcast.teamMessage.message.name}**:${message.broadcast.teamMessage.message.message}`);
+        channel.send(
+          `${helpers.ts(2)} (${message.broadcast.teamMessage.message.time}) **${
+            message.broadcast.teamMessage.message.name
+          }**:${message.broadcast.teamMessage.message.message}`
+        );
     }
     console.log(JSON.stringify(message));
     console.log("------end------");
