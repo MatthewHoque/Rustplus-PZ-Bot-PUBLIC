@@ -1010,6 +1010,30 @@ async function promoteToLeader(vp, message) {
 }
 module.exports.promoteToLeader = promoteToLeader;
 
+async function promoteToLeaderIntegrated(vp, interaction) {
+  // var args = message.content.split(" ");
+
+  var response = "";
+  const targetUser = interaction.options.getString('steamid')
+
+  await vp.rustplus.sendRequest(
+    {
+      promoteToLeader: {
+        steamId: targetUser,
+      },
+    },
+    (x) => {
+      console.log(x);
+      if (x != undefined) {
+        interaction.reply({ content: x, ephemeral: true });
+        // message.reply(JSON.stringify(x));
+      }
+    }
+  );
+  // seqName cameraId falseLoopDelay priority
+}
+module.exports.promoteToLeaderIntegrated = promoteToLeaderIntegrated;
+
 function iniAllTurretNetworks(vp, turretConfig) {
   
   

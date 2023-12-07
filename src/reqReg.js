@@ -19,6 +19,14 @@ class reqReg {
     vp.throt.processQueueLoop();
   }
 
+  static promoteLeadIntegrated(vp, message) {
+    var curryCall = new curryPot(vp.rpf.promoteToLeaderIntegrated, null, vp, interaction);
+    curryCall.setVars(50, 1, 0);
+    vp.throt.queueReq(curryCall);
+    vp.throt.processQueueLoop();
+  }
+
+
   static regSetDevice(vp, deviceId,onOff) {
     var curryCall = new curryPot(vp.rpf.wrapToggleDevice,null,vp,deviceId,onOff);
     curryCall.setVars(1, 1, 0);

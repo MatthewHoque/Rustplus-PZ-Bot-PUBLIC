@@ -5,6 +5,7 @@ const fs = require("fs");
 const rr = require("./reqReg.js");
 const fcmHandler = require("./fcmHandler.js");
 const DiscordCommandTool = require("./DiscordCommandTool.js");
+const {Events } = require('discord.js');
 var vp = new varPooler();
 var fcm = new fcmHandler(vp);
 // fcm.startup();
@@ -34,7 +35,7 @@ var tokenFile = require("./discordToken.json");
   // },
 // ];
 
-var regDisc=new DiscordCommandTool(tokenFile)
+
 
 // const rest = new REST({ version: "10" }).setToken(tokenFile.token);
 
@@ -65,6 +66,8 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
   ],
 });
+
+var regDisc=new DiscordCommandTool(tokenFile,client)
 
 vp.setDiscordClient(client);
 vp.client.login(tokenFile.token);
@@ -98,61 +101,83 @@ vp.client.on("ready", () => {
   }
 });
 
-client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
 
-  if (interaction.commandName === "ping") {
-    await interaction.reply({
-      embeds: [
-        {
-          title: `Hello`,
-          description: ``,
-        },
-      ],
-      //this is the important part
-      ephemeral: true,
-    });
-  } else if (interaction.commandName === "code") {
-    const guild = client.guilds.cache.get(interaction.guildId);
-    if (!guild)
-      return console.log(`Can't find the guild with ID ${interaction.guildId}`);
-    guild.members
-      .fetch() //this gives a whole list if user id not found, using incorrectly initially
-      .then(async (memberList) => {
-        // console.log(memberList);
-        // console.log(interaction.member.user.id);
-        if (
-          discordHelpers.roleOR(
-            discordHelpers.getUser(interaction.member.user.id, memberList),
-            vp.dat.getInfoRoles
-          )
-        ) {
-          await interaction.reply({
-            embeds: [
-              {
-                title: `Do not share, if asked, refer to this command`,
-                description: require("./configs/userInfo.json").info,
-              },
-            ],
-            //this is the important part
-            ephemeral: true,
-          });
-          delete require.cache[require.resolve("./configs/userInfo.json")];
-        } else {
-          await interaction.reply({
-            embeds: [
-              {
-                title: `You do not have permissions for this`,
-                description: "Contact Rustalz admin",
-              },
-            ],
-            //this is the important part
-            ephemeral: true,
-          });
-        }
-      })
-      .catch(console.error);
-  }
+	const command = interaction.client.commands.get(interaction.commandName);
+
+	if (!command) {
+		console.error(`No command matching ${interaction.commandName} was found.`);
+		return;
+	}
+
+	try {
+		await command.execute(interaction,vp,fcm,client);
+	} catch (error) {
+		console.error(error);
+		if (interaction.replied || interaction.deferred) {
+			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+		} else {
+			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		}
+	}
+});
+
+// client.on("interactionCreate", async (interaction) => {
+//   if (!interaction.isChatInputCommand()) return;
+
+//   if (interaction.commandName === "ping") {
+//     await interaction.reply({
+//       embeds: [
+//         {
+//           title: `Hello`,
+//           description: ``,
+//         },
+//       ],
+//       //this is the important part
+//       ephemeral: true,
+//     });
+//   } else if (interaction.commandName === "code") {
+//     const guild = client.guilds.cache.get(interaction.guildId);
+//     if (!guild)
+//       return console.log(`Can't find the guild with ID ${interaction.guildId}`);
+//     guild.members
+//       .fetch() //this gives a whole list if user id not found, using incorrectly initially
+//       .then(async (memberList) => {
+//         // console.log(memberList);
+//         // console.log(interaction.member.user.id);
+//         if (
+//           discordHelpers.roleOR(
+//             discordHelpers.getUser(interaction.member.user.id, memberList),
+//             vp.dat.getInfoRoles
+//           )
+//         ) {
+//           await interaction.reply({
+//             embeds: [
+//               {
+//                 title: `Do not share, if asked, refer to this command`,
+//                 description: require("./configs/userInfo.json").info,
+//               },
+//             ],
+//             //this is the important part
+//             ephemeral: true,
+//           });
+//           delete require.cache[require.resolve("./configs/userInfo.json")];
+//         } else {
+//           await interaction.reply({
+//             embeds: [
+//               {
+//                 title: `You do not have permissions for this`,
+//                 description: "Contact Rustalz admin",
+//               },
+//             ],
+//             //this is the important part
+//             ephemeral: true,
+//           });
+//         }
+//       })
+//       .catch(console.error);
+//   }
   // else if (interaction.commandName === "lead") {
   //   const guild = client.guilds.cache.get(interaction.guildId);
   //   if (!guild)
@@ -194,7 +219,7 @@ client.on("interactionCreate", async (interaction) => {
   //     })
   //     .catch(console.error);
   // }
-});
+// });
 
 vp.client.on("messageCreate", (message) => {
   if (!message.content.startsWith("!")) {
@@ -685,3 +710,10 @@ console.log("Attempting Rust+ Connect");
 vp.rustplus.connect();
 
 //endRUST+
+
+
+// module.exports={
+//   client,
+//   vp,
+//   fcm
+// }
